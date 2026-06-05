@@ -95,6 +95,7 @@
   .b-t3 { background: #ede9fe; color: #6366f1; }
   .b-ex { background: #d1fae5; color: #059669; }
   .b-3x { background: #fef3c7; color: #d97706; }
+  .b-sf { background: #fce7f3; color: #db2777; }
   .b-item .val { font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; white-space:nowrap; }
   .b-item .val.ex { color: #059669; }
   .b-item .val.tx { color: #d97706; }
@@ -140,6 +141,12 @@
       <input type="number" id="tripleHours" value="0" step="0.5" min="0" placeholder="输入三薪工时">
     </div>
   </div>
+  <div class="input-group">
+    <label>早晚班次数</label>
+    <div class="input-wrapper">
+      <input type="number" id="shiftCount" value="0" step="1" min="0" placeholder="输入早晚班次数">
+    </div>
+  </div>
   <button class="calc-btn" onclick="calculate()">💰 计算工资</button>
   <div class="result-section" id="resultSection">
     <div class="total-box">
@@ -157,6 +164,7 @@
       <div class="rule-item"><span>70–120h</span><span class="hl">多拿 10%（按总工时划档）</span></div>
       <div class="rule-item"><span>121–167h</span><span class="hl">多拿 20%（按总工时划档）</span></div>
       <div class="rule-item"><span>三薪班</span><span class="hl">三薪工时 × 时薪 × 3</span></div>
+      <div class="rule-item"><span>早晚班补贴</span><span class="hl">早晚班次数 × 20 元</span></div>
     </div>
   </div>
   <div class="footer">仅供参考，以实际发放为准</div>
@@ -172,7 +180,8 @@ function upCents(v) {
 function calculate() {
   const rate = parseFloat(document.getElementById('hourlyRate').value) || 0;
   const regular = parseFloat(document.getElementById('regularHours').value) || 0;
-  const triple = parseFloat(document.getElementById('tripleHours').value) || 0;
+    const triple = parseFloat(document.getElementById('tripleHours').value) || 0;
+  const shiftCount = parseInt(document.getElementById('shiftCount').value) || 0;
   if (rate <= 0 || (regular <= 0 && triple <= 0)) {
     document.getElementById('resultSection').classList.remove('visible');
     return;
@@ -183,17 +192,22 @@ function calculate() {
   const base = upCents(regular * rate);
   const e2 = upCents(hT2 * rate * 0.10);
   const e3 = upCents(hT3 * rate * 0.20);
-  const tripleAmt = upCents(triple * rate * 3);
-  const grand = upCents(base + e2 + e3 + tripleAmt);
+    const tripleAmt = upCents(triple * rate * 3);
+  const shiftAmt = upCents(shiftCount * 20);
+  const grand = upCents(base + e2 + e3 + tripleAmt + shiftAmt);
   document.getElementById('totalAmount').textContent = grand.toFixed(2);
-  document.getElementById('effectiveRateInfo').textContent = '总工时 ' + total + 'h（普通' + regular + 'h + 三薪' + triple + 'h）';
+    let infoText = '总工时 ' + total + 'h（普通' + regular + 'h + 三薪' + triple + 'h';
+  if (shiftCount > 0) infoText += ' + 早晚班' + shiftCount + '次';
+  infoText += '）';
+  document.getElementById('effectiveRateInfo').textContent = infoText;
   let html = '';
   html += '<div class="b-item"><div class="label"><span class="bdg b-bas">基本</span> 普通 ' + regular + 'h × 基础时薪</div><div class="val">￥' + base.toFixed(2) + '</div></div>';
-  if (hT2 > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-t2">+10%</span> 70-120h（总' + total + 'h）· ' + hT2 + 'h</div><div class="val ex">+￥' + e2.toFixed(2) + '</div></div>';
-  if (hT3 > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-t3">+20%</span> 121-167h（总' + total + 'h）· ' + hT3 + 'h</div><div class="val ex">+￥' + e3.toFixed(2) + '</div></div>';
+  if (hT2 > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-t2">+10%</span> 70-120h(' + hT2 + 'h)</div><div class="val ex">+￥' + e2.toFixed(2) + '</div></div>';
+  if (hT3 > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-t3">+20%</span> 121-167h(' + hT3 + 'h)</div><div class="val ex">+￥' + e3.toFixed(2) + '</div></div>';
   const eT = e2 + e3;
   if (eT > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-ex">高工时补贴</span> ' + hT2 + 'h×10% + ' + hT3 + 'h×20%</div><div class="val ex" style="font-size:15px;">+￥' + upCents(eT).toFixed(2) + '</div></div>';
-  if (triple > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-3x">三薪</span> ' + triple + 'h × 时薪 × 3</div><div class="val tx">￥' + tripleAmt.toFixed(2) + '</div></div>';
+    if (triple > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-3x">三薪</span> ' + triple + 'h × 时薪 × 3</div><div class="val tx">￥' + tripleAmt.toFixed(2) + '</div></div>';
+  if (shiftCount > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-sf">早晚班</span> ' + shiftCount + '次 × 20 元/次</div><div class="val ex">+￥' + shiftAmt.toFixed(2) + '</div></div>';
   html += '<div class="b-item dv"><div class="label" style="font-weight:700;">合计</div><div class="val">￥' + grand.toFixed(2) + '</div></div>';
   document.getElementById('breakdownItems').innerHTML = html;
   document.getElementById('resultSection').classList.add('visible');
@@ -202,10 +216,4 @@ function calculate() {
 document.addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
 </script>
 </body>
-<script>
-</script>
 </html>
-
-
-
-
