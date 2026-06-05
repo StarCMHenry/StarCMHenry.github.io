@@ -2,7 +2,7 @@
   "name": "星巴克学兼工资计算器",
   "short_name": "星巴克工资",
   "description": "星巴克兼职阶梯工资及三薪班计算",
-  "start_url": "salary_calculator.html",
+  "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f8fafc",
