@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="星巴克工资">
+<meta name="apple-mobile-web-app-title" content="Henry's Site">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="index.png">
-<title>星巴克学兼工资计算器</title>
+<title>Henry's Site</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -22,6 +22,56 @@
     padding: 16px;
     -webkit-font-smoothing: antialiased;
   }
+
+  /* ── Landing page ── */
+  .landing {
+    display: flex;
+    gap: 24px;
+    max-width: 800px;
+    width: 100%;
+  }
+  .landing-card {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 48px 32px 40px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  .landing-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 4px;
+    transition: opacity 0.25s ease;
+  }
+  .landing-card.left::before  { background: linear-gradient(90deg, #2563eb, #6366f1); }
+  .landing-card.right::before { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+  .landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .landing-card:active { transform: scale(0.97); }
+  .landing-icon { font-size: 56px; margin-bottom: 16px; display: block; line-height: 1; }
+  .landing-card h2 { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+  .landing-card p { color: #64748b; font-size: 14px; line-height: 1.5; }
+  .landing-card.left  h2 { color: #1e3a5f; }
+  .landing-card.right h2 { color: #92400e; }
+  .landing-arrow {
+    display: inline-block; margin-top: 20px;
+    width: 40px; height: 40px; line-height: 40px;
+    border-radius: 50%; font-size: 18px; color: #fff;
+    transition: transform 0.25s ease;
+  }
+  .landing-card.left  .landing-arrow { background: linear-gradient(135deg, #2563eb, #6366f1); }
+  .landing-card.right .landing-arrow { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  .landing-card:hover .landing-arrow { transform: translateX(2px); }
+
+  /* ── Calculator (existing styles, mostly untouched) ── */
   .container {
     background: #ffffff;
     border-radius: 28px;
@@ -108,105 +158,206 @@
   .rule-title { color: #64748b; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
   .rule-item { color: #475569; font-size: 13px; padding: 2px 0; display: flex; justify-content: space-between; }
   .rule-item .hl { color: #0f172a; font-weight: 500; }
-  .footer { text-align: center; margin-top: 16px; color: #94a3b8; font-size: 12px; }
-  @media (max-width: 480px) {
+  .footer-text { text-align: center; margin-top: 16px; color: #94a3b8; font-size: 12px; }
+
+  /* ── Back button ── */
+  .back-row { margin-bottom: 12px; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: 1.5px solid #e2e8f0;
+    border-radius: 10px; padding: 8px 14px;
+    color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .back-btn:hover { border-color: #cbd5e1; color: #334155; background: #f8fafc; }
+
+  /* ── Blog placeholder ── */
+  .placeholder-container {
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 64px 32px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .placeholder-icon { font-size: 64px; margin-bottom: 20px; display: block; }
+  .placeholder-container h2 { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
+  .placeholder-container p { color: #64748b; font-size: 15px; margin-bottom: 6px; }
+  .construction-badge {
+    display: inline-block; margin-top: 16px;
+    padding: 6px 18px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #92400e; font-size: 13px; font-weight: 700;
+    border-radius: 20px; letter-spacing: 1px;
+  }
+
+  /* ── View toggling ── */
+  .view { display: none; }
+  .view.active { display: flex; align-items: center; justify-content: center; width: 100%; }
+  .view-wrapper { width: 100%; display: flex; align-items: center; justify-content: center; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .landing { flex-direction: column; gap: 16px; }
+    .landing-card { padding: 36px 24px 28px; }
+    .landing-icon { font-size: 44px; }
+    .landing-card h2 { font-size: 18px; }
     .container { padding: 24px 18px; border-radius: 20px; }
     .total-amount { font-size: 32px; }
     body { padding: 12px; }
+    .placeholder-container { padding: 48px 20px; }
   }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <span class="logo">☕</span>
-    <h1>星巴克学兼工资计算器</h1>
-  </div>
-  <div class="input-group">
-    <label>时薪（元/小时）</label>
-    <div class="input-wrapper">
-      <span class="prefix">￥</span>
-      <input type="number" id="hourlyRate" value="0" step="0.5" min="0" placeholder="输入时薪">
+
+<!-- ── Landing page ── -->
+<div class="view active" id="viewLanding">
+  <div class="landing">
+    <div class="landing-card left" onclick="showView('calculator')">
+      <span class="landing-icon">☕</span>
+      <h2>学兼工资计算</h2>
+      <p>星巴克学兼工资快速计算，支持工时、三薪、早晚班补贴</p>
+      <span class="landing-arrow">→</span>
+    </div>
+    <div class="landing-card right" onclick="showView('blog')">
+      <span class="landing-icon">📝</span>
+      <h2>Henry's Blog</h2>
+      <p>技术分享 &amp; 生活记录</p>
+      <span class="landing-arrow">→</span>
     </div>
   </div>
-  <div class="input-group">
-    <label>普通工时</label>
-    <div class="input-wrapper">
-      <input type="number" id="regularHours" value="0" step="0.5" min="0" placeholder="输入普通工时">
-    </div>
-  </div>
-  <div class="input-group">
-    <label>三薪工时 <span class="hint">(法定节假日)</span></label>
-    <div class="input-wrapper">
-      <input type="number" id="tripleHours" value="0" step="0.5" min="0" placeholder="输入三薪工时">
-    </div>
-  </div>
-  <div class="input-group">
-    <label>早晚班次数</label>
-    <div class="input-wrapper">
-      <input type="number" id="shiftCount" value="0" step="1" min="0" placeholder="输入早晚班次数">
-    </div>
-  </div>
-  <button class="calc-btn" onclick="calculate()">💰 计算工资</button>
-  <div class="result-section" id="resultSection">
-    <div class="total-box">
-      <div class="total-label">本月应发工资</div>
-      <div class="total-amount"><span class="currency">￥</span><span id="totalAmount">0.00</span></div>
-      <div class="rate-info" id="effectiveRateInfo"></div>
-    </div>
-    <div class="breakdown" id="breakdown">
-      <div class="breakdown-title">📊 工资明细</div>
-      <div id="breakdownItems"></div>
-    </div>
-    <div class="rule">
-      <div class="rule-title">📋 计算规则</div>
-      <div class="rule-item"><span>基本工资</span><span class="hl">普通工时 × 基础时薪</span></div>
-      <div class="rule-item"><span>70–120h</span><span class="hl">多拿 10%（按总工时划档）</span></div>
-      <div class="rule-item"><span>121–167h</span><span class="hl">多拿 20%（按总工时划档）</span></div>
-      <div class="rule-item"><span>三薪班</span><span class="hl">三薪工时 × 时薪 × 3</span></div>
-      <div class="rule-item"><span>早晚班补贴</span><span class="hl">早晚班次数 × 20 元</span></div>
-    </div>
-  </div>
-  <div class="footer">仅供参考，以实际发放为准</div>
 </div>
+
+<!-- ── Calculator view ── -->
+<div class="view" id="viewCalculator">
+  <div class="view-wrapper">
+    <div class="container">
+      <div class="back-row">
+        <button class="back-btn" onclick="showView('landing')">← 返回首页</button>
+      </div>
+      <div class="header">
+        <span class="logo">☕</span>
+        <h1>星巴克学兼工资计算器</h1>
+      </div>
+      <div class="input-group">
+        <label>时薪（元/小时）</label>
+        <div class="input-wrapper">
+          <span class="prefix">￥</span>
+          <input type="number" id="hourlyRate" value="0" step="0.5" min="0" placeholder="输入时薪">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>普通工时</label>
+        <div class="input-wrapper">
+          <input type="number" id="regularHours" value="0" step="0.5" min="0" placeholder="输入普通工时">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>三薪工时 <span class="hint">(法定节假日)</span></label>
+        <div class="input-wrapper">
+          <input type="number" id="tripleHours" value="0" step="0.5" min="0" placeholder="输入三薪工时">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>早晚班次数</label>
+        <div class="input-wrapper">
+          <input type="number" id="shiftCount" value="0" step="1" min="0" placeholder="输入早晚班次数">
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calculate()">💰 计算工资</button>
+      <div class="result-section" id="resultSection">
+        <div class="total-box">
+          <div class="total-label">本月应发工资</div>
+          <div class="total-amount"><span class="currency">￥</span><span id="totalAmount">0.00</span></div>
+          <div class="rate-info" id="effectiveRateInfo"></div>
+        </div>
+        <div class="breakdown" id="breakdown">
+          <div class="breakdown-title">📊 工资明细</div>
+          <div id="breakdownItems"></div>
+        </div>
+        <div class="rule">
+          <div class="rule-title">📋 计算规则</div>
+          <div class="rule-item"><span>基本工资</span><span class="hl">普通工时 × 基础时薪</span></div>
+          <div class="rule-item"><span>70–120h</span><span class="hl">多拿 10%（按总工时划档）</span></div>
+          <div class="rule-item"><span>121–167h</span><span class="hl">多拿 20%（按总工时划档）</span></div>
+          <div class="rule-item"><span>三薪班</span><span class="hl">三薪工时 × 时薪 × 3</span></div>
+          <div class="rule-item"><span>早晚班补贴</span><span class="hl">早晚班次数 × 20 元</span></div>
+        </div>
+      </div>
+      <div class="footer-text">仅供参考，以实际发放为准</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Blog placeholder ── -->
+<div class="view" id="viewBlog">
+  <div class="view-wrapper">
+    <div class="placeholder-container">
+      <div class="back-row" style="text-align:left;">
+        <button class="back-btn" onclick="showView('landing')">← 返回首页</button>
+      </div>
+      <span class="placeholder-icon">🚧</span>
+      <h2>Henry's Blog</h2>
+      <p>技术分享 · 生活记录 · 个人思考</p>
+      <div class="construction-badge">项目开发中</div>
+    </div>
+  </div>
+</div>
+
 <script>
+/* ── View switching ── */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(function(el) { el.classList.remove('active'); });
+  var target = document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (target) target.classList.add('active');
+  // Reset result section when leaving calculator
+  if (name !== 'calculator') {
+    var rs = document.getElementById('resultSection');
+    if (rs) rs.classList.remove('visible');
+  }
+}
+
+/* ── Salary calculation (unchanged) ── */
 function upCents(v) {
-  const raw = v * 100;
-  const fl = Math.floor(raw);
+  var raw = v * 100;
+  var fl = Math.floor(raw);
   if (raw - fl > 1e-9) return (fl + 1) / 100;
   return fl / 100;
 }
 
 function calculate() {
-  const rate = parseFloat(document.getElementById('hourlyRate').value) || 0;
-  const regular = parseFloat(document.getElementById('regularHours').value) || 0;
-    const triple = parseFloat(document.getElementById('tripleHours').value) || 0;
-  const shiftCount = parseInt(document.getElementById('shiftCount').value) || 0;
+  var rate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+  var regular = parseFloat(document.getElementById('regularHours').value) || 0;
+  var triple = parseFloat(document.getElementById('tripleHours').value) || 0;
+  var shiftCount = parseInt(document.getElementById('shiftCount').value) || 0;
   if (rate <= 0 || (regular <= 0 && triple <= 0)) {
     document.getElementById('resultSection').classList.remove('visible');
     return;
   }
-  const total = regular + triple;
-  const hT3 = Math.max(0, Math.min(total, 167) - 120);
-  const hT2 = Math.max(0, Math.min(total, 120) - 70);
-  const base = upCents(regular * rate);
-  const e2 = upCents(hT2 * rate * 0.10);
-  const e3 = upCents(hT3 * rate * 0.20);
-    const tripleAmt = upCents(triple * rate * 3);
-  const shiftAmt = upCents(shiftCount * 20);
-  const grand = upCents(base + e2 + e3 + tripleAmt + shiftAmt);
+  var total = regular + triple;
+  var hT3 = Math.max(0, Math.min(total, 167) - 120);
+  var hT2 = Math.max(0, Math.min(total, 120) - 70);
+  var base = upCents(regular * rate);
+  var e2 = upCents(hT2 * rate * 0.10);
+  var e3 = upCents(hT3 * rate * 0.20);
+  var tripleAmt = upCents(triple * rate * 3);
+  var shiftAmt = upCents(shiftCount * 20);
+  var grand = upCents(base + e2 + e3 + tripleAmt + shiftAmt);
   document.getElementById('totalAmount').textContent = grand.toFixed(2);
-    let infoText = '总工时 ' + total + 'h（普通' + regular + 'h + 三薪' + triple + 'h';
+  var infoText = '总工时 ' + total + 'h（普通' + regular + 'h + 三薪' + triple + 'h';
   if (shiftCount > 0) infoText += ' + 早晚班' + shiftCount + '次';
   infoText += '）';
   document.getElementById('effectiveRateInfo').textContent = infoText;
-  let html = '';
+  var html = '';
   html += '<div class="b-item"><div class="label"><span class="bdg b-bas">基本</span> 普通 ' + regular + 'h × 基础时薪</div><div class="val">￥' + base.toFixed(2) + '</div></div>';
   if (hT2 > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-t2">+10%</span> 70-120h(' + hT2 + 'h)</div><div class="val ex">+￥' + e2.toFixed(2) + '</div></div>';
   if (hT3 > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-t3">+20%</span> 121-167h(' + hT3 + 'h)</div><div class="val ex">+￥' + e3.toFixed(2) + '</div></div>';
-  const eT = e2 + e3;
+  var eT = e2 + e3;
   if (eT > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-ex">高工时补贴</span> ' + hT2 + 'h×10% + ' + hT3 + 'h×20%</div><div class="val ex" style="font-size:15px;">+￥' + upCents(eT).toFixed(2) + '</div></div>';
-    if (triple > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-3x">三薪</span> ' + triple + 'h × 时薪 × 3</div><div class="val tx">￥' + tripleAmt.toFixed(2) + '</div></div>';
+  if (triple > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-3x">三薪</span> ' + triple + 'h × 时薪 × 3</div><div class="val tx">￥' + tripleAmt.toFixed(2) + '</div></div>';
   if (shiftCount > 0) html += '<div class="b-item"><div class="label"><span class="bdg b-sf">早晚班</span> ' + shiftCount + '次 × 20 元/次</div><div class="val ex">+￥' + shiftAmt.toFixed(2) + '</div></div>';
   html += '<div class="b-item dv"><div class="label" style="font-weight:700;">合计</div><div class="val">￥' + grand.toFixed(2) + '</div></div>';
   document.getElementById('breakdownItems').innerHTML = html;
